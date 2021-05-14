@@ -1,0 +1,6 @@
+.env
+dockercommands.txt
+
+db/data/*
+db/logs/*
+db/plugins/*
