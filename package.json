@@ -1,0 +1,26 @@
+{
+  "name": "nutricipies",
+  "version": "0.1.0",
+  "description": "Graph database school project",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "neo4j-driver": "^4.2.3",
+    "nodemon": "^2.0.7"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "nodemon server/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joesjo/no-sql-project.git"
+  },
+  "author": "Joel Sjöstand, Talal Attar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joesjo/no-sql-project/issues"
+  },
+  "homepage": "https://github.com/joesjo/no-sql-project#readme"
+}
