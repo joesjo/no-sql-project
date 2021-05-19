@@ -1,6 +1,9 @@
 .env
 dockercommands.txt
+neo4jcommands.txt
 
 db/data/*
 db/logs/*
 db/plugins/*
+
+node_modules
