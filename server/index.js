@@ -9,7 +9,7 @@ app.get('/', (req, res) => {
 
 app.get('/recipes', (req, res) => {
     db.listRecipes()
-     .then(result => res.send(result))
+    .then(result => res.send(result))
     .catch(err => res.send(err))
 })
 
@@ -31,6 +31,12 @@ app.get('/users', (req, res) => {
     .catch(err => res.send(err))
 })
 
+app.get('/users/:id', (req, res) => {
+    db.getUser(req.params.id)
+    .then(result => res.send(result))
+    .catch(err => res.send(err))
+})
+
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`)
+    console.log(`Listening at http://localhost:${port}`)
 })

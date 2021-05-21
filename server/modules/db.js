@@ -72,29 +72,6 @@ exports.getRecipe = (recipeId) => {
     })
 }
 
-exports.getPrice = (itemId) => {
-    return new Promise((resolve, reject) => {
-        const session = driver.session({database:"neo4j"})
-        const query = 'MATCH (i) WHERE id(i) = $id RETURN i'
-        const parameters = {
-            id: parseInt(itemId)
-        }
-
-        session.run(query, parameters)
-        .then(res => {
-            session.close()
-            switch (getItemLabel(res.records[0])) {
-                case "Ingredient":
-                    resolve(this.getIngredientPrice(getItemId(res.records[0])))
-                    break;
-                default:
-                    reject('Item does not have a price')
-            }
-        })
-        .catch(err => reject(err))
-    })
-}
-
 exports.getIngredientPrices = (ingredientId) => {
     return new Promise((resolve, reject) => {
         const session = driver.session({database:"neo4j"})
@@ -126,13 +103,52 @@ exports.getIngredientPrices = (ingredientId) => {
 exports.getUsers = () => {
     return new Promise((resolve, reject) => {
         const session = driver.session({database:"neo4j"})
-        const query = 'MATCH (u:User) return u'
+        const query = 'MATCH (user:User) return user'
         session.run(query)
         .then(res => {
             resolve(res.records.map(item => ({
-                identity: item.get('u').identity.low,
-                ...item.get('u').properties
+                identity: item.get('user').identity.low,
+                ...item.get('user').properties
             })))
+        })
+        .catch(err => reject(err))
+    })
+}
+
+exports.getUser = (userId) => {
+    return new Promise((resolve, reject) => {
+        const session = driver.session({database:"neo4j"})
+        const query = 'MATCH (user:User)-[rel:LIKE|DISLIKE]->(n) WHERE id(user) = $id RETURN user, rel, n'
+        const parameters = {
+            id: parseInt(userId)
+        }
+        session.run(query, parameters)
+        .then(res => {
+            session.close()
+            let user = res.records[0].get('user')
+            let likeArray = []
+            let dislikeArray = []
+            res.records.forEach(record => {
+                item = record.get('n')
+                formatted = {
+                    identity: item.identity.low,
+                    type: item.labels[0],
+                    ...item.properties
+                }
+                if (record.get('rel').type === 'LIKE') {
+                    likeArray = [...likeArray, formatted]
+                } else if (record.get('rel').type === 'DISLIKE') {
+                    dislikeArray = [...dislikeArray, formatted]
+                }
+            })
+            resolve({
+                user: {
+                    identity: user.identity.low,
+                    ...user.properties
+                },
+                likes: likeArray,
+                dislikes: dislikeArray
+            })
         })
         .catch(err => reject(err))
     })
