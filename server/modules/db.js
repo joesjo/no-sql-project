@@ -1,23 +1,6 @@
 const neo4j = require('neo4j-driver')
 const driver = neo4j.driver('bolt://localhost:7687/', neo4j.auth.basic('neo4j', 'password'))
-
-exports.getRecipes = () => {
-    return new Promise((resolve, reject) => {
-        const session = driver.session({database:"neo4j"});
-        const query = 'MATCH (r:Recipe) RETURN r'
-    
-        session.run(query)
-        .then(res => {
-            session.close()
-            resolve(res.records.map(record => ({
-                id: getItemId(record),
-                label: getItemLabel(record),
-                properties: getItemProperties(record)
-            })))
-        })
-        .catch(err => reject(err))
-    })
-}
+const util = require('util')
 
 exports.getRecipe = (recipeId) => {
     return new Promise((resolve, reject) => {
@@ -100,21 +83,6 @@ exports.getIngredientPrices = (ingredientId) => {
     })
 }
 
-exports.getUsers = () => {
-    return new Promise((resolve, reject) => {
-        const session = driver.session({database:"neo4j"})
-        const query = 'MATCH (user:User) return user'
-        session.run(query)
-        .then(res => {
-            resolve(res.records.map(item => ({
-                identity: item.get('user').identity.low,
-                ...item.get('user').properties
-            })))
-        })
-        .catch(err => reject(err))
-    })
-}
-
 exports.getUser = (userId) => {
     return new Promise((resolve, reject) => {
         const session = driver.session({database:"neo4j"})
@@ -150,6 +118,50 @@ exports.getUser = (userId) => {
                 dislikes: dislikeArray
             })
         })
+        .catch(err => reject(err))
+    })
+}
+
+exports.getNodes = (nodeLabel) => {
+    return new Promise((resolve, reject) => {
+        const session = driver.session({database:"neo4j"})
+        const query = `MATCH (n:${nodeLabel}) return n;`
+
+        session.run(query)
+        .then(res => {
+            session.close()
+            resolve(res.records.map(item => ({
+                identity: item.get('n').identity.low,
+                ...item.get('n').properties
+            })))
+        })
+        .catch(err => reject(err))
+    })
+}
+
+exports.createNode = (nodeLabel, properties) => {
+    return new Promise((resolve, reject) => {
+        const session = driver.session({database:"neo4j"})
+        const query = `MERGE (n:${nodeLabel}${util.inspect(properties)}) return n;`
+
+        session.run(query)
+        .then(response => resolve(response.records[0].get('n')))
+        .catch(err => reject(err))
+    })
+}
+
+exports.createRelationship = (firstId, secondId, relationshipLabel, relationshipProperties = {}) => {
+    return new Promise((resolve, reject) => {
+        const session = driver.session({database:"neo4j"})
+        const query = `
+            MATCH (i), (j)
+            WHERE id(i) = ${firstId} AND id(j) = ${secondId}
+            MERGE (i)-[r:${relationshipLabel}${util.inspect(relationshipProperties)}]->(j)
+            RETURN i, r, j;
+        `
+        
+        session.run(query)
+        .then(response => resolve(response.records[0]))
         .catch(err => reject(err))
     })
 }

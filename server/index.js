@@ -8,7 +8,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/recipes', (req, res) => {
-    db.getRecipes()
+    db.getNodes('Recipe')
     .then(result => res.send(result))
     .catch(err => res.send(err))
 })
@@ -26,7 +26,7 @@ app.get('/ingredients/:id', (req, res) => {
 })
 
 app.get('/users', (req, res) => {
-    db.getUsers()
+    db.getNodes('User')
     .then(result => res.send(result))
     .catch(err => res.send(err))
 })
