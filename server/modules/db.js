@@ -1,7 +1,7 @@
 const neo4j = require('neo4j-driver')
 const driver = neo4j.driver('bolt://localhost:7687/', neo4j.auth.basic('neo4j', 'password'))
 
-exports.listRecipes = () => {
+exports.getRecipes = () => {
     return new Promise((resolve, reject) => {
         const session = driver.session({database:"neo4j"});
         const query = 'MATCH (r:Recipe) RETURN r'

@@ -8,7 +8,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/recipes', (req, res) => {
-    db.listRecipes()
+    db.getRecipes()
     .then(result => res.send(result))
     .catch(err => res.send(err))
 })
